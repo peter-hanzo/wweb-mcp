@@ -143,7 +143,7 @@ async function startMcpSseServer(
 
   app.use(errorHandler);
 
-  app.listen(port, () => {
+  app.listen(port, '0.0.0.0', () => {
     logger.info(`MCP server is running on port ${port} in ${mode} mode`);
   });
 }
