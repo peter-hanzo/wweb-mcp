@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  whatsapp-api:
+    image: ghcr.io/***  # Использование публичного образа
+    container_name: whatsapp-api
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+    environment:
+      - MODE=whatsapp-api
+      - API_PORT=3001
+      - API_KEY=your-api-key
+    networks:
+      - whatsapp-network  # Указываем, что контейнер будет в этой сети
+    restart: unless-stopped
+
+  whatsapp-mcp:
+    image: ghcr.io/**** # Использование того же образа
+    container_name: whatsapp-mcp
+    ports:
+      - "3002:3002"
+    environment:
+      - MODE=mcp
+      - TRANSPORT=sse
+      - SSE_PORT=3002
+      - MCP_MODE=server
+      - API_BASE_URL=http://whatsapp-api:3001/api  # Используем имя контейнера для связи
+      - API_KEY=your-api-key
+    networks:
+      - whatsapp-network  # Указываем, что контейнер будет в этой сети
+    restart: unless-stopped
+
+networks:
+  whatsapp-network:
+    driver: bridge  
