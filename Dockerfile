@@ -16,13 +16,21 @@ RUN apt-get update && \
 # Установка проекта
 WORKDIR /project
 
-# Копируем package.json и устанавливаем зависимости
-COPY package.json /project/package.json
-RUN npm install
-
-# Копируем конфигурацию TypeScript и исходные файлы
+# Копируем конфигурацию и исходники
 COPY tsconfig.json /project/tsconfig.json
 COPY src/ /project/src
+
+RUN echo "=== СОДЕРЖИМОЕ /project ===" && \
+    ls -la /project && \
+    echo "=== СОДЕРЖИМОЕ /project/src ===" && \
+    ls -la /project/src && \
+    echo "=== ВСЕ .ts файлы ===" && \
+    find /project -name "*.ts" && \
+    echo "=== ЗАПУСК npm run build ===" && \
+    npm run build || (echo "=== ❌ BUILD FAILED ===" && cat /root/.npm/_logs/* || true)
+
+
+RUN npm install
 
 # Собираем проект
 RUN echo "=== Проверка содержимого src/ ===" && ls -la /project/src && echo "=== DONE ==="
