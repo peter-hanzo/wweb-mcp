@@ -17,6 +17,7 @@ RUN apt-get update && \
 WORKDIR /project
 
 # Копируем конфигурацию и исходники
+COPY package.json /project/package.json
 COPY tsconfig.json /project/tsconfig.json
 COPY src/ /project/src
 
