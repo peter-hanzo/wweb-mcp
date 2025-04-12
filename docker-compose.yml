@@ -1,25 +1,23 @@
 version: '3.8'
 
 services:
-  whatsapp-api:
+  whatsapp:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: whatsapp-api
-    ports:
-      - "3001:3001"   # Проброс REST API порта
-      - "3002:3002"   # Проброс порта для MCP-сервера
+    container_name: whatsapp-server
     environment:
-      - MODE=whatsapp-api
-      - API_PORT=3001
-      - API_KEY=your-api-key   # Если нужно для авторизации
-    command: >
-      node dist/main.js
-      --mode whatsapp-api
-      --api-port 3001
+      MODE: mcp                       # 👈 Измени на 'whatsapp-api' если нужно
+      API_PORT: 3001
+      API_KEY: your-api-key
+      SSE_PORT: 3002
+      TRANSPORT: sse      # Или 'command' для STDIN
+      API_BASE_URL: http://localhost:3001/api
+    ports:
+      - "3001:3001"
+      - "3002:3002"
     restart: unless-stopped
-    networks:
-      - whatsapp-network  # Подключение к общей сети
+
 
   whatsapp-mcp:
     build:
