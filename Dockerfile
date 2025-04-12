@@ -7,36 +7,34 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 RUN apt-get update && \
     apt-get install -y wget gnupg && \
-    apt-get install -y fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
-        libgtk2.0-0 libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1 libasound2 && \
+    apt-get install -y \
+      fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
+      libxss1 libgtk2.0-0 libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1 libasound2 && \
     apt-get install -y chromium && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Установка проекта
 WORKDIR /project
 
-# Копируем конфигурацию и исходники
+# Копируем конфигурационные файлы и исходники
 COPY package.json /project/package.json
 COPY tsconfig.json /project/tsconfig.json
 COPY src/ /project/src
 
+# Установка зависимостей
+RUN npm install
+
+# Диагностика перед сборкой
 RUN echo "=== СОДЕРЖИМОЕ /project ===" && \
     ls -la /project && \
     echo "=== СОДЕРЖИМОЕ /project/src ===" && \
     ls -la /project/src && \
     echo "=== ВСЕ .ts файлы ===" && \
-    find /project -name "*.ts" && \
-    echo "=== ЗАПУСК npm run build ===" && \
+    find /project -name "*.ts"
+
+# Сборка проекта
+RUN echo "=== ЗАПУСК npm run build ===" && \
     npm run build || (echo "=== ❌ BUILD FAILED ===" && cat /root/.npm/_logs/* || true)
-
-
-RUN npm install
-
-# Собираем проект
-RUN echo "=== Проверка содержимого src/ ===" && ls -la /project/src && echo "=== DONE ==="
-RUN ls -la /project && ls -la /project/src || (echo "❌ src/ не скопирован" && exit 1)
-RUN npm run build 
 
 # Устанавливаем переменную окружения
 ENV DOCKER_CONTAINER=true
@@ -45,5 +43,17 @@ ENV DOCKER_CONTAINER=true
 EXPOSE 3001
 EXPOSE 3002
 
-# Запуск приложения
-ENTRYPOINT ["node", "dist/main.js"]
+# Запуск с разветвлением по переменной окружения MODE
+ENTRYPOINT [ "sh", "-c", "\
+  if [ \"$MODE\" = \"whatsapp-api\" ]; then \
+    node dist/main.js --mode whatsapp-api --api-port ${API_PORT:-3001}; \
+  elif [ \"$MODE\" = \"mcp\" ]; then \
+    node dist/main.js --mode mcp \
+      --transport ${TRANSPORT:-sse} \
+      --sse-port ${SSE_PORT:-3002} \
+      --api-base-url ${API_BASE_URL:-http://localhost:3001/api} \
+      --api-key ${API_KEY:-default-api-key}; \
+  else \
+    echo \"❌ Unknown MODE: $MODE\"; exit 1; \
+  fi \
+"]
