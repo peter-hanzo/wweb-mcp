@@ -25,7 +25,9 @@ COPY tsconfig.json /project/tsconfig.json
 COPY src/ /project/src
 
 # Собираем проект
-RUN npm run build || (echo "=== BUILD FAILED ===" && ls -la && cat /root/.npm/_logs/* || true)
+RUN echo "=== Проверка содержимого src/ ===" && ls -la /project/src && echo "=== DONE ==="
+RUN ls -la /project && ls -la /project/src || (echo "❌ src/ не скопирован" && exit 1)
+RUN npm run build 
 
 # Устанавливаем переменную окружения
 ENV DOCKER_CONTAINER=true
