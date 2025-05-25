@@ -6,15 +6,18 @@ services:
     container_name: whatsapp-api
     environment:
       - MODE=whatsapp-api
-      - API_PORT=${API_PORT:-5001}
       - API_KEY=${API_KEY}
+    command: >
+      sh -c "node dist/main.js \
+        --mode whatsapp-api \
+        --api-port 5001"
     ports:
-      - "${API_PORT:-5001}:${API_PORT:-5001}"
+      - "5001:5001"
     volumes:
       - whatsapp_api_auth:/app/.wwebjs_auth
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${API_PORT:-5001}/api/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:5001/api/health || exit 1"]
       interval: 10s
       retries: 5
       timeout: 5s
@@ -26,14 +29,20 @@ services:
     container_name: whatsapp-mcp
     environment:
       - MODE=mcp
-      - TRANSPORT=${TRANSPORT:-sse}
-      - SSE_PORT=${SSE_PORT:-5002}
-      - API_BASE_URL=http://whatsapp-api:${API_PORT:-5001}/api
       - API_KEY=${API_KEY}
-    ports:
-      - "${SSE_PORT:-5002}:${SSE_PORT:-5002}"
     depends_on:
       - whatsapp-api
+    command: >
+      sh -c "node dist/main.js \
+        --mode mcp \
+        --transport sse \
+        --sse-port 5002 \
+        --api-base-url http://whatsapp-api:5001/api \
+        --api-key ${API_KEY}"
+    ports:
+      - "5002:5002"
+    volumes:
+      - whatsapp_api_auth:/app/.wwebjs_auth
     restart: unless-stopped
     networks:
       - dokploy-network
