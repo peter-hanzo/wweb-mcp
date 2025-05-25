@@ -28,7 +28,7 @@ RUN echo "=== ЗАПУСК npm run build ===" && \
 
 ENV DOCKER_CONTAINER=true
 
-ENTRYPOINT [ "sh", "-c", "\
+ENTRYPOINT ["sh", "-c", "\
   if [ \"$MODE\" = \"whatsapp-api\" ]; then \
     node dist/main.js --mode whatsapp-api --api-port 5001; \
   elif [ \"$MODE\" = \"mcp\" ]; then \
@@ -39,4 +39,6 @@ ENTRYPOINT [ "sh", "-c", "\
       --api-key default-api-key; \
   else \
     echo \"❌ Unknown MODE: $MODE\"; exit 1; \
+  fi \
 "]
+
