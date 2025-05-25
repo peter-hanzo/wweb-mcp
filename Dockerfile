@@ -8,7 +8,7 @@ RUN apt-get update && \
     apt-get install -y wget gnupg \
       fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
       libxss1 libgtk2.0-0 libnss3 libatk-bridge2.0-0 libdrm2 libxkbcommon0 libgbm1 libasound2 \
-      chromium-browser && \
+      chromium && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /project
