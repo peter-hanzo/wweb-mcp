@@ -1,4 +1,4 @@
-# WhatsApp Web MCP
+# WhatsApp Web MCP--
 
 [![PR Checks](https://github.com/pnizer/wweb-mcp/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/pnizer/wweb-mcp/actions/workflows/pr-checks.yml)
 
